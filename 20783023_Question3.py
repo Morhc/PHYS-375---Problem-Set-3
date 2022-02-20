@@ -91,7 +91,7 @@ def part_g():
     return alpha, rho_c, K, x_0
 
 def part_h(alpha, rho_c, K, x_0, savepath=""):
-    """Solves the Lane-Emden equation numerically for various n and plots it.
+    """Calculates the density, pressure, and temperature as a function of r/Rstar and plots it.
     INPUTS:
         alpha - scaling ratio between x and r.
         rho_c - the central density of the star.
@@ -99,7 +99,8 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
         x_0 - the radius of the star in x.
         savepath - Path to save the plot to. If nothing is given, it will just display.
     OUTPUTS:
-        Outputs a plot of the density, pressure, and temperature as a function of r/Rstar
+        Outputs a plot of the density, pressure, and temperature as a function of r/Rstar.
+        rho - the density as a function of r/Rstar.
     """
 
     X, Y = 0.55, 0.4
@@ -126,11 +127,56 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     #we get temperature by rearranging Equation 15.79 from Ryden
     T = P*mu*mp/(k*rho)
 
-    plt.plot(x_reduced, T, label=r'$T$($r$)')
-    plt.plot(x_reduced, P, label=r'$P$($r$)')
-    plt.plot(x_reduced, rho, label=r'$\rho$($r$)')
+    #plot the temperature
+    plt.title(r'$T$($r/R_{star}$) vs r/$R_{star}$')
+    plt.plot(x_reduced, T)
+    plt.ylabel(r'$T$($r/R_{star}$) (K/m)')
+    plt.xlabel(r'r/$R_{star}$')
 
-    plt.legend(loc='best')
+    plt.xlim(0,1)
+
+    if savepath == "":
+        plt.show()
+    else:
+        plt.savefig(savepath.replace('.png', '_T.png'))
+
+    plt.close('all')
+
+    #plot the pressure
+    plt.title(r'$P$($r/R_{star}$) vs r/$R_{star}$')
+    plt.plot(x_reduced, P)
+    plt.ylabel(r'$P$($r/R_{star}$) (Pa/m)')
+    plt.xlabel(r'r/$R_{star}$')
+
+    plt.xlim(0,1)
+
+    if savepath == "":
+        plt.show()
+    else:
+        plt.savefig(savepath.replace('.png', '_P.png'))
+
+    plt.close('all')
+
+    #plot the density
+    plt.title(r'$\rho$($r/R_{star}$) vs r/$R_{star}$')
+    plt.plot(x_reduced, T)
+    plt.ylabel(r'$\rho$($r/R_{star}$) (kg/m$^3$ / m)')
+    plt.xlabel(r'r/$R_{star}$')
+
+    plt.xlim(0,1)
+
+    if savepath == "":
+        plt.show()
+    else:
+        plt.savefig(savepath.replace('.png', '_rho.png'))
+
+    plt.close('all')
+
+    return rho
+
+def part_i(rho, savepath=""):
+
+    pass
 
     if savepath == "":
         plt.show()
@@ -151,6 +197,9 @@ def main():
 
     h_path = os.path.join(here, 'PS3-Q3h.png')
     part_h(alpha, rho_c, K, x_0, h_path)
+
+    i_path = os.path.join(here, 'PS3-Q3i.png')
+    part_i(rho, i_path)
 
 if __name__ == '__main__':
     main()
