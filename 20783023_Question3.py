@@ -59,18 +59,17 @@ def part_e(savepath=""):
 
     plt.close('all')
 
-def part_g():
+def part_g(R, M):
     """Assuming n=3, Rstar = 1Rsun, and Mstar = 1Mstar; we find alpha, rho_c, and K
     INPUTS:
+        R - The radius of the star.
+        M - The mass of the star.
         savepath - Path to save the plot to. If nothing is given, it will just display.
     OUTPUTS:
         Returns alpha, rho_c, and K
     """
 
     n = 3
-    #grabbed from p. 576 of Ryden
-    R = 6.955e8
-    M = 1.989e30
     G = 6.673e-11
 
     x = np.linspace(0, 10, 1000)
@@ -101,13 +100,13 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     OUTPUTS:
         Outputs a plot of the density, pressure, and temperature as a function of r/Rstar.
         rho - the density as a function of r/Rstar.
+        T - the temperature as a function of r/Rstar.
     """
 
     X, Y = 0.55, 0.4
     mu = np.power(2*X + 3*Y/4, -1) #from Lecture 9a; assuming Z = 0
 
-    #grabbed from p. 576 of Ryden
-    R = 6.955e8
+
     #grabbed from p. 575 of Ryden
     mp = 1.673e-27
     k = 1.381e-23
@@ -128,7 +127,7 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     T = P*mu*mp/(k*rho)
 
     #plot the temperature
-    plt.title(r'$T$($r/R_{star}$) vs r/$R_{star}$')
+    plt.title(r'$T$($r/R_{star}$) vs $r/R_{star}$')
     plt.plot(x_reduced, T)
     plt.ylabel(r'$T$($r/R_{star}$) (K/m)')
     plt.xlabel(r'r/$R_{star}$')
@@ -143,7 +142,7 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     plt.close('all')
 
     #plot the pressure
-    plt.title(r'$P$($r/R_{star}$) vs r/$R_{star}$')
+    plt.title(r'$P$($r/R_{star}$) vs $r/R_{star}$')
     plt.plot(x_reduced, P)
     plt.ylabel(r'$P$($r/R_{star}$) (Pa/m)')
     plt.xlabel(r'r/$R_{star}$')
@@ -158,7 +157,7 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     plt.close('all')
 
     #plot the density
-    plt.title(r'$\rho$($r/R_{star}$) vs r/$R_{star}$')
+    plt.title(r'$\rho$($r/R_{star}$) vs $r/R_{star}$')
     plt.plot(x_reduced, T)
     plt.ylabel(r'$\rho$($r/R_{star}$) (kg/m$^3$ / m)')
     plt.xlabel(r'r/$R_{star}$')
@@ -172,18 +171,77 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
 
     plt.close('all')
 
-    return rho
+    return rho, T
 
-def part_i(rho, savepath=""):
+def part_i(rho, T, alpha, x_0, savepath=""):
+    """Calculate and plot the energy generation rates and the change in luminosity over r/Rstar
+    INPUTS:
+        rho - the density of the star as a function of r/Rstar.
+        T - the temperature of the star as a function of r/Rstar.
+        alpha - the scaling coefficient between x and r.
+        x_0 - the radius of the star in x.
+        savepath - The path to save the plot to. If none is supplied then it is displayed.
+    OUTPUTS:
+        Outputs a plot of the luminosity change and energy generation rates as a function of r/Rstar
+    """
 
-    pass
+    X = 0.55
+    Xcno = 0.03*X
+
+    x_reduced = np.linspace(0, x_0, 1000)/x_0
+
+    #from Lecture 12b
+    eps_pp = 1.07e-7 * (X**2) * (rho/1e5) * np.power(T/1e6, 4)
+    eps_cno = 8.24e-26 * X * Xcno * (rho/1e5) * np.power(T/1e6, 19.9)
+
+    #calculate luminosity from Equation 15.78 | assuming eps = eps_pp + eps_cno
+    dL_dr = 4*np.pi*(x_reduced**2)*rho*(eps_pp + eps_cno)
+
+    #plot the proton-proton energy generation
+    plt.plot(x_reduced, eps_pp)
+    plt.title(r'$\epsilon_{pp}$($r/R_{star}$) vs $r/R_{star}$')
+    plt.ylabel(r'$\epsilon_{pp}$($r/R_{star}$) (W/kg / m)')
+    plt.xlabel(r'r/$R_{star}$')
 
     if savepath == "":
         plt.show()
     else:
-        plt.savefig(savepath)
+        plt.savefig(savepath.replace('.png', '_pp.png'))
 
     plt.close('all')
+
+    #plot the CNO energy generation
+    plt.plot(x_reduced, eps_cno)
+    plt.title(r'$\epsilon_{CNO}$($r/R_{star}$) vs $r/R_{star}$')
+    plt.ylabel(r'$\epsilon_{CNO}$($r/R_{star}$) (W/kg / m)')
+    plt.xlabel(r'r/$R_{star}$')
+
+    if savepath == "":
+        plt.show()
+    else:
+        plt.savefig(savepath.replace('.png', '_cno.png'))
+
+    plt.close('all')
+
+    #plot dL/dr
+    plt.plot(x_reduced, dL_dr)
+    plt.title(r'$\frac{dL}{dr}$($r/R_{star}$) vs $r/R_{star}$')
+    plt.ylabel(r'$\frac{dL}{dr}$($r/R_{star}$) (W/m / m)')
+    plt.xlabel(r'r/$R_{star}$')
+
+    if savepath == "":
+        plt.show()
+    else:
+        plt.savefig(savepath.replace('.png', '_L.png'))
+
+    plt.close('all')
+
+    #Since dL = integral(4pi r^2 rho(r) * eps(r) dr) we can reasonably convert this to a sum
+    u = alpha * x_0
+    L = np.sum(dL_dr * u) * (x_reduced[1] * u - x_reduced[0] * u) * u
+    print(f'The total luminosity for this star is: {L} Watts')
+
+
 
 def main():
 
@@ -192,14 +250,21 @@ def main():
     e_path = os.path.join(here, 'PS3-Q3e.png')
     part_e(e_path)
 
-    alpha, rho_c, K, x_0 = part_g()
-    print(f'The solved variables are:\n\talpha = {alpha}\n\trho_c = {rho_c}\n\tK = {K}\n')
+    for r_scale, m_scale in zip([10, 0.6, 1], [20, 0.5, 1]):
+        print(f'R_scale: {r_scale}; M_scale: {m_scale}')
 
-    h_path = os.path.join(here, 'PS3-Q3h.png')
-    part_h(alpha, rho_c, K, x_0, h_path)
+        #grabbed from p. 576 of Ryden
+        R = r_scale * 6.955e8
+        M = m_scale * 1.989e30
 
-    i_path = os.path.join(here, 'PS3-Q3i.png')
-    part_i(rho, i_path)
+        alpha, rho_c, K, x_0 = part_g(R, M)
+        print(f'The solved variables are:\n\talpha = {alpha}\n\trho_c = {rho_c}\n\tK = {K}\n')
+
+        h_path = os.path.join(here, 'PS3-Q3h.png')
+        rho, T = part_h(alpha, rho_c, K, x_0, h_path)
+
+        i_path = os.path.join(here, 'PS3-Q3i.png')
+        part_i(rho, T, alpha, x_0, i_path)
 
 if __name__ == '__main__':
     main()
