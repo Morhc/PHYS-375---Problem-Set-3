@@ -238,7 +238,7 @@ def part_i(rho, T, alpha, x_0, savepath=""):
 
     #Since dL = integral(4pi r^2 rho(r) * eps(r) dr) we can reasonably convert this to a sum
     u = alpha * x_0
-    L = np.sum(dL_dr * u) * (x_reduced[1] * u - x_reduced[0] * u) * u
+    L = np.sum(dL_dr)*u * (x_reduced[1] * u - x_reduced[0] * u) * u
     print(f'The total luminosity for this star is: {L} Watts')
 
 
@@ -262,6 +262,7 @@ def main():
 
         h_path = os.path.join(here, 'PS3-Q3h.png')
         rho, T = part_h(alpha, rho_c, K, x_0, h_path)
+        print(f'Tc = {T[0]}') #Tc = T(r=0)
 
         i_path = os.path.join(here, 'PS3-Q3i.png')
         part_i(rho, T, alpha, x_0, i_path)
