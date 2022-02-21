@@ -114,11 +114,13 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     n = 3
 
     #note: r/Rstar = x/x_0, so we can plot over that scale :)
-    x_reduced = np.linspace(0, x_0, 1000)/x_0
+    x = np.linspace(0, x_0, 1000)
 
-    thetas, dthetas = compute_theta(x_reduced, n)
+    thetas, dthetas = compute_theta(x, n)
 
-    rho = (np.power(thetas, n)*rho_c)
+    rho = np.power(thetas, n)*rho_c
+
+    x_reduced = x/x_0
 
     #since we assume a polytropic equation, we know P(r) = K*p(r)^(1/n + 1)
     P = K * np.power(rho, 1/n + 1)
@@ -131,7 +133,6 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     plt.plot(x_reduced, T)
     plt.ylabel(r'$T$($r/R_{star}$) (K/m)')
     plt.xlabel(r'r/$R_{star}$')
-
     plt.xlim(0,1)
 
     if savepath == "":
@@ -146,7 +147,6 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
     plt.plot(x_reduced, P)
     plt.ylabel(r'$P$($r/R_{star}$) (Pa/m)')
     plt.xlabel(r'r/$R_{star}$')
-
     plt.xlim(0,1)
 
     if savepath == "":
@@ -158,10 +158,9 @@ def part_h(alpha, rho_c, K, x_0, savepath=""):
 
     #plot the density
     plt.title(r'$\rho$($r/R_{star}$) vs $r/R_{star}$')
-    plt.plot(x_reduced, T)
+    plt.plot(x_reduced, rho)
     plt.ylabel(r'$\rho$($r/R_{star}$) (kg/m$^3$ / m)')
     plt.xlabel(r'r/$R_{star}$')
-
     plt.xlim(0,1)
 
     if savepath == "":
@@ -202,6 +201,7 @@ def part_i(rho, T, alpha, x_0, savepath=""):
     plt.title(r'$\epsilon_{pp}$($r/R_{star}$) vs $r/R_{star}$')
     plt.ylabel(r'$\epsilon_{pp}$($r/R_{star}$) (W/kg / m)')
     plt.xlabel(r'r/$R_{star}$')
+    plt.xlim(0,1)
 
     if savepath == "":
         plt.show()
@@ -215,6 +215,7 @@ def part_i(rho, T, alpha, x_0, savepath=""):
     plt.title(r'$\epsilon_{CNO}$($r/R_{star}$) vs $r/R_{star}$')
     plt.ylabel(r'$\epsilon_{CNO}$($r/R_{star}$) (W/kg / m)')
     plt.xlabel(r'r/$R_{star}$')
+    plt.xlim(0,1)
 
     if savepath == "":
         plt.show()
@@ -228,6 +229,7 @@ def part_i(rho, T, alpha, x_0, savepath=""):
     plt.title(r'$\frac{dL}{dr}$($r/R_{star}$) vs $r/R_{star}$')
     plt.ylabel(r'$\frac{dL}{dr}$($r/R_{star}$) (W/m / m)')
     plt.xlabel(r'r/$R_{star}$')
+    plt.xlim(0,1)
 
     if savepath == "":
         plt.show()
@@ -238,7 +240,7 @@ def part_i(rho, T, alpha, x_0, savepath=""):
 
     #Since dL = integral(4pi r^2 rho(r) * eps(r) dr) we can reasonably convert this to a sum
     u = alpha * x_0
-    L = np.sum(dL_dr)*u * (x_reduced[1] * u - x_reduced[0] * u) * u
+    L = np.sum(dL_dr[:-10])*u * (x_reduced[1] * u - x_reduced[0] * u) * u
     print(f'The total luminosity for this star is: {L} Watts')
 
 
